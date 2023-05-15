@@ -8,6 +8,34 @@ const items = ss.getSheetByName('Items');
 const emails = ss.getSheetByName('Emails');
 const ui = SpreadsheetApp.getUi();
 
+//------- Send custom mail ----------//
+function sendEmail(actionType, popName, acName, problemType, jobId) {
+  let recipients = emails.getDataRange().getValues();
+
+  if (actionType != 'request') {
+    Logger.log('sendEmail(): Unknown actionType');
+    return;
+  }
+  
+  if (actionType == 'request') {
+    for (i = 0; i < recipients.length; i++) {
+      if (recipients[i][0] == 'Admin') {
+        var recipientTo = recipients[i][2];
+      }
+      if (recipients[i][0] == 'Head') {
+        var recipientCc = recipients[i][2];
+      }
+
+    }
+  }
+
+  const subject = `AC maintenance ${actionType}: ${popName}-${acName}-${jobId}`;
+  const body = `Job Id: ${jobId} \nPoP Name: ${popName} \nAC name: ${acName} \nProblem type: ${problemType} \n\n${ss.getUrl()}`;
+  const options = {cc:recipientCc};
+
+  MailApp.sendEmail(recipientTo, subject, body, options);
+}
+
 //-- Submit maintenance request --//
 function submitRequest() {
   let currentDateTime = new Date();
@@ -23,7 +51,9 @@ function submitRequest() {
   }
 
   let lastRowNumber = requests.getLastRow();
-
-  let job = [lastRowNumber + 1, popName, acName, problemType, currentDateTime];
+  let jobId = lastRowNumber + 1;
+  let job = [jobId, popName, acName, problemType, currentDateTime];
   requests.appendRow(job);
+
+  sendEmail('request', popName, acName, problemType, jobId);
 }
