@@ -17,21 +17,21 @@ function sendEmail(actionType, popName, acName, problemType, jobId) {
     return;
   }
   
+  let recipientCcList = [];
   if (actionType == 'request') {
     for (i = 0; i < recipients.length; i++) {
-      if (recipients[i][0] == 'Admin') {
-        var recipientTo = recipients[i][2];
+      if (recipients[i][1] == 'Admin' && recipients[i][2] == 'Manager') {
+        var recipientTo = recipients[i][3];
       }
-      if (recipients[i][0] == 'Head') {
-        var recipientCc = recipients[i][2];
+      if (recipients[i][0] == 'Technical' && recipients[i][2] == 'Head') {
+        recipientCcList.push(recipients[i][3]);
       }
-
     }
   }
 
+  const options = {cc:recipientCcList.join(',')};
   const subject = `AC maintenance ${actionType}: ${popName}-${acName}-${jobId}`;
   const body = `Job Id: ${jobId} \nPoP Name: ${popName} \nAC name: ${acName} \nProblem type: ${problemType} \n\n${ss.getUrl()}`;
-  const options = {cc:recipientCc};
 
   MailApp.sendEmail(recipientTo, subject, body, options);
 }
